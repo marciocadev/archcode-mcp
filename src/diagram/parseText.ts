@@ -25,7 +25,7 @@ const DETECTORS: Detector[] = [
   { service: 'api-gateway-rest', pattern: /\b(?:api\s+gateway(?:\s+rest)?|apigateway|rest\s+api|api\s+rest|\bapi)\b/gi },
   { service: 'eventbridge-scheduler', pattern: /\b(?:eventbridge\s+scheduler|agendador|agendamento|scheduler|schedule)\b/gi },
   { service: 'eventbridge-event', pattern: /\b(?:eventbridge(?:\s+event|\s+rule)?|regra\s+de\s+evento|evento)\b/gi },
-  { service: 'dynamodb-table', pattern: /\b(?:dynamodb|dynamo\s*db|dynamo|tabela)\b/gi },
+  { service: 'dynamodb-table', pattern: /\b(?:dynamodb|dynamo\s*db|dynamo|tabela|table)\b/gi },
   { service: 'sqs-queue', pattern: /\b(?:sqs|fila|queue)\b/gi },
   { service: 'sns-topic', pattern: /\b(?:sns|t[oó]pico|topic)\b/gi },
   { service: 's3-bucket', pattern: /\b(?:s3|bucket)\b/gi },
@@ -46,7 +46,7 @@ const FILLER = new Set([
 ])
 
 const SERVICE_WORD = new Set([
-  'api', 'apigateway', 'lambda', 'dynamodb', 'dynamo', 'sqs', 'sns', 's3', 'bucket',
+  'api', 'apigateway', 'lambda', 'function', 'dynamodb', 'dynamo', 'table', 'sqs', 'queue', 'sns', 'topic', 's3', 'bucket',
   'dlq', 'ssm', 'eventbridge', 'scheduler', 'schedule', 'secret', 'secrets', 'segredo',
   'evento', 'event', 'fila', 'tabela', 'topico', 'tópico', 'funcao', 'função',
 ])
@@ -56,7 +56,7 @@ const GENERICS: Array<{ service: ServiceName; pattern: RegExp }> = [
   { service: 'api-gateway-rest', pattern: /\bapi\b/gi },
   { service: 'eventbridge-scheduler', pattern: /\b(?:agendamento|agendador|scheduler|schedule)\b/gi },
   { service: 'eventbridge-event', pattern: /\b(?:evento|regra)\b/gi },
-  { service: 'dynamodb-table', pattern: /\b(?:tabela|dynamodb|dynamo)\b/gi },
+  { service: 'dynamodb-table', pattern: /\b(?:tabela|table|dynamodb|dynamo)\b/gi },
   { service: 'sqs-queue', pattern: /\b(?:fila|queue)\b/gi },
   { service: 'sns-topic', pattern: /\b(?:t[oó]pico|topic)\b/gi },
   { service: 's3-bucket', pattern: /\b(?:bucket|s3)\b/gi },
@@ -159,6 +159,7 @@ const WORD_SERVICE: Record<string, ServiceName> = {
   dynamodb: 'dynamodb-table',
   dynamo: 'dynamodb-table',
   tabela: 'dynamodb-table',
+  table: 'dynamodb-table',
   sqs: 'sqs-queue',
   fila: 'sqs-queue',
   queue: 'sqs-queue',
@@ -232,11 +233,11 @@ function readName(text: string, from: number): { name: string; end: number } | n
     if (!match) return null
     const word = match[0]
     const folded = fold(word)
-    if (SERVICE_WORD.has(folded)) return null
     if (FILLER.has(folded) || HTTP_VERBS.includes(word.toUpperCase() as HttpVerb)) {
       index += word.length
       continue
     }
+    if (SERVICE_WORD.has(folded)) return null
     return { name: word, end: index + word.length }
   }
   return null
